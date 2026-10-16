@@ -1,0 +1,652 @@
+
+const express = require("express");
+const cors = require("cors");
+const cheerio = require("cheerio");
+
+const app = express();
+const PORT = Number(process.env.PORT) || 3000;
+const TEMPO_CACHE_MS = 10 * 60 * 1000;
+const TEMPO_LIMITE_MS = 10000;
+const MAX_CURSOS_POR_FONTE = 8;
+
+app.use(cors());
+app.use(express.json());
+
+const fontes = [
+  {
+    instituicao: "ETEC",
+    url: "https://vestibulinho.etec.sp.gov.br/lp/",
+    categoria: "tecnico",
+    descricao:
+      "Consulte os cursos técnicos, o calendário e os requisitos do Vestibulinho das Etecs."
+  },
+  {
+    instituicao: "FATEC",
+    url: "https://vestibular.fatec.sp.gov.br/",
+    categoria: "vestibular",
+    descricao:
+      "Consulte os cursos superiores de tecnologia e as informações do Vestibular das Fatecs."
+  },
+  {
+    instituicao: "SENAI-SP",
+    url: "https://www.sp.senai.br/cursos-tecnicos-comunidade",
+    categoria: "tecnico",
+    descricao:
+      "Consulte os cursos técnicos do Senai-SP e as informações de cada formação."
+  },
+  {
+    instituicao: "IFSP",
+    url: "https://www.ifsp.edu.br/",
+    categoria: "tecnico",
+    descricao:
+      "Consulte os processos seletivos e as oportunidades de formação do Instituto Federal de São Paulo."
+  },
+  {
+    instituicao: "SENAC-SP",
+    url: "https://www.sp.senac.br/cursos-tecnicos",
+    categoria: "tecnico",
+    descricao:
+      "Consulte os cursos técnicos disponíveis no Senac São Paulo."
+  }
+];
+
+let cache = {
+  atualizadoEm: null,
+  oportunidades: [],
+  fontes: []
+};
+
+let ultimaConsulta = 0;
+let consultaEmAndamento = null;
+
+function normalizar(texto = "") {
+  return String(texto)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("pt-BR")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function textoLimpo(texto = "") {
+  return String(texto)
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function validarUrl(valor, base) {
+  try {
+    const url = new URL(valor, base);
+
+    if (!["http:", "https:"].includes(url.protocol)) {
+      return null;
+    }
+
+    url.hash = "";
+
+    return url;
+  } catch {
+    return null;
+  }
+}
+
+function extrairMeta($, seletores) {
+  for (const seletor of seletores) {
+    const elemento = $(seletor).first();
+
+    const valor =
+      elemento.attr("content") ||
+      elemento.text();
+
+    if (valor && textoLimpo(valor)) {
+      return textoLimpo(valor);
+    }
+  }
+
+  return "";
+}
+
+function criarPortal(fonte) {
+  return {
+    id: `portal-${normalizar(fonte.instituicao)
+      .replace(/[^a-z0-9]+/g, "-")}`,
+    titulo: `Cursos e oportunidades — ${fonte.instituicao}`,
+    instituicao: fonte.instituicao,
+    categoria: fonte.categoria,
+    tipo: "portal",
+    status: "consultar_portal",
+    descricao: fonte.descricao,
+    detalhes: null,
+    requisitos: null,
+    cargaHoraria: null,
+    modalidade: null,
+    dataPublicacao: null,
+    dataEncerramento: null,
+    gratuito: null,
+    url: fonte.url,
+    fonte: fonte.url,
+    dadosConfirmados: false
+  };
+}
+
+function ehTituloGenerico(titulo) {
+  const texto = normalizar(titulo);
+
+  const genericos = [
+    /^conferir pesquisa$/,
+    /^conheca a pesquisa/,
+    /^pesquisa senac/,
+    /^conheca nossos cursos$/,
+    /^cursos tecnicos$/,
+    /^cursos livres$/,
+    /^cursos$/,
+    /^conheca cursos$/,
+    /^saiba mais$/,
+    /^conferir$/,
+    /^inscreva-se$/,
+    /^inscricao$/,
+    /^inscricoes$/,
+    /^comprar agora$/,
+    /^bolsas de estudo$/,
+    /^processo seletivo$/,
+    /^vestibular$/,
+    /^vestibulinho$/,
+    /^inicio$/,
+    /^home$/,
+    /^menu$/,
+    /^clique aqui$/,
+    /^ver mais$/,
+    /^visualizar mais$/,
+    /^acesse aqui$/,
+    /^conhecer cursos$/
+  ];
+
+  return genericos.some(regra => regra.test(texto));
+}
+
+function classificarTipo(titulo, url) {
+  const texto = normalizar(`${titulo} ${url}`);
+
+  if (/edital|processo seletivo|vestibular|vestibulinho|ingresso/.test(texto)) {
+    return "processo_seletivo";
+  }
+
+  if (/aprendizagem industrial|aprendiz senai|jovem aprendiz/.test(texto)) {
+    return "aprendizagem";
+  }
+
+  if (/pos graduacao|pos-graduacao|especializacao|mba/.test(texto)) {
+    return "pos_graduacao";
+  }
+
+  if (/graduacao|bacharelado|licenciatura|curso superior|tecnologo/.test(texto)) {
+    return "graduacao";
+  }
+
+  if (/curso tecnico|cursos tecnicos|tecnico em|tecnico de|ensino medio tecnico/.test(texto)) {
+    return "tecnico";
+  }
+
+  if (/curso|capacitacao|formacao profissional/.test(texto)) {
+    return "curso";
+  }
+
+  return "portal";
+}
+
+function ehCursoIndividual(fonte, titulo, destino) {
+  const tituloNormalizado = normalizar(titulo);
+  const caminho = normalizar(destino.pathname);
+
+  if (ehTituloGenerico(titulo)) {
+    return false;
+  }
+
+  // No Senac, prioriza URLs que aparentam ser páginas individuais.
+  if (fonte.instituicao === "SENAC-SP") {
+    const caminhoDeCurso =
+      /\/curso-de-[^/]+/.test(caminho) ||
+      /\/curso-tecnico-[^/]+/.test(caminho) ||
+      /\/tecnico-em-[^/]+/.test(caminho) ||
+      /\/ensino-medio-tecnico\/[^/]+/.test(caminho);
+
+    const tituloDeCurso =
+      /^(tecnico em |tecnico de |ensino medio tecnico em )/.test(
+        tituloNormalizado
+      );
+
+    return caminhoDeCurso || tituloDeCurso;
+  }
+
+  return (
+    /curso|tecnico|aprendizagem|vestibular|vestibulinho|processo seletivo|edital|inscricao|bolsa/.test(
+      normalizar(`${titulo} ${destino.pathname}`)
+    )
+  );
+}
+
+function extrairInformacoesPagina($) {
+  const tituloH1 = textoLimpo($("h1").first().text());
+
+  const tituloMeta = extrairMeta($, [
+    'meta[property="og:title"]',
+    'meta[name="twitter:title"]'
+  ]);
+
+  const tituloDocumento = textoLimpo($("title").first().text());
+
+  const titulo =
+    tituloH1 ||
+    tituloMeta ||
+    tituloDocumento;
+
+  const descricaoMeta = extrairMeta($, [
+    'meta[name="description"]',
+    'meta[property="og:description"]',
+    'meta[name="twitter:description"]'
+  ]);
+
+  // Procura um parágrafo próximo do conteúdo principal.
+  const seletoresDescricao = [
+    "main article p",
+    "main .descricao p",
+    "main .description p",
+    "main p",
+    "article p",
+    '[itemprop="description"]',
+    ".descricao-curso",
+    ".description"
+  ];
+
+  let descricaoConteudo = "";
+
+  for (const seletor of seletoresDescricao) {
+    const candidato = textoLimpo($(seletor).first().text());
+
+    if (candidato.length >= 40) {
+      descricaoConteudo = candidato;
+      break;
+    }
+  }
+
+  const descricao =
+    descricaoMeta.length >= 30
+      ? descricaoMeta
+      : descricaoConteudo;
+
+  const textoPagina = textoLimpo(
+    $("main").text() || $("body").text()
+  );
+
+  const requisitosEncontrados = textoPagina.match(
+    /(?:requisitos?|pré-requisitos?|quem pode participar|escolaridade mínima)\s*[:\-]?\s*([^.!?]{15,300})/i
+  );
+
+  const cargaHorariaEncontrada = textoPagina.match(
+    /\b\d{1,4}\s*(?:horas|hora)\b/i
+  );
+
+  let modalidade = null;
+
+  if (/\bpresencial\b/i.test(textoPagina)) {
+    modalidade = "Presencial";
+  } else if (
+    /\b(?:ead|ensino a distancia|educacao a distancia|online|on-line)\b/i.test(
+      textoPagina
+    )
+  ) {
+    modalidade = "EAD";
+  }
+
+  return {
+    titulo,
+    descricao: descricao ? descricao.slice(0, 700) : null,
+    detalhes: textoPagina
+      ? textoPagina.slice(0, 1500)
+      : null,
+    requisitos: requisitosEncontrados
+      ? textoLimpo(requisitosEncontrados[1])
+      : null,
+    cargaHoraria: cargaHorariaEncontrada
+      ? cargaHorariaEncontrada[0]
+      : null,
+    modalidade
+  };
+}
+
+async function buscarPagina(url) {
+  const resposta = await fetch(url, {
+    signal: AbortSignal.timeout(TEMPO_LIMITE_MS),
+    headers: {
+      "User-Agent":
+        "Mozilla/5.0 (compatible; FuturoEmConstrucao/1.0)",
+      Accept: "text/html,application/xhtml+xml"
+    }
+  });
+
+  if (!resposta.ok) {
+    throw new Error(`HTTP ${resposta.status}`);
+  }
+
+  const tipoConteudo =
+    resposta.headers.get("content-type") || "";
+
+  if (!tipoConteudo.includes("text/html") &&
+      !tipoConteudo.includes("application/xhtml+xml")) {
+    throw new Error("A resposta não é uma página HTML.");
+  }
+
+  return resposta.text();
+}
+
+async function consultarDetalheCurso(url, tituloDoLink) {
+  try {
+    const html = await buscarPagina(url);
+    const $ = cheerio.load(html);
+
+    $("script, style, noscript, iframe, svg").remove();
+
+    const informacoes = extrairInformacoesPagina($);
+
+    // Evita usar o título genérico da página como nome de curso.
+    const tituloEspecifico =
+      informacoes.titulo &&
+      !ehTituloGenerico(informacoes.titulo);
+
+    const titulo = tituloEspecifico
+      ? informacoes.titulo
+      : tituloDoLink;
+
+    if (!titulo || ehTituloGenerico(titulo)) {
+      return null;
+    }
+
+    const tipo = classificarTipo(titulo, url);
+
+    if (tipo === "portal") {
+      return null;
+    }
+
+    return {
+      ...informacoes,
+      titulo,
+      tipo,
+      url
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function consultarFonte(fonte) {
+  const portal = criarPortal(fonte);
+
+  try {
+    const html = await buscarPagina(fonte.url);
+    const $ = cheerio.load(html);
+
+    $("script, style, noscript, iframe, svg").remove();
+
+    const dominioFonte = new URL(fonte.url).hostname;
+    const candidatos = new Map();
+
+    $("a[href]").each((_, elemento) => {
+      const link = $(elemento);
+
+      const titulo = textoLimpo(
+        link.attr("aria-label") ||
+        link.attr("title") ||
+        link.text()
+      );
+
+      const href = link.attr("href");
+
+      if (
+        !href ||
+        titulo.length < 5 ||
+        titulo.length > 180 ||
+        ehTituloGenerico(titulo)
+      ) {
+        return;
+      }
+
+      const destino = validarUrl(href, fonte.url);
+
+      if (!destino) return;
+
+      // Só aceita páginas do mesmo domínio da instituição.
+      if (destino.hostname !== dominioFonte) return;
+
+      if (!ehCursoIndividual(fonte, titulo, destino)) {
+        return;
+      }
+
+      if (destino.href === fonte.url) return;
+
+      candidatos.set(destino.href, {
+        titulo,
+        url: destino.href
+      });
+    });
+
+    // Limita consultas por fonte para não sobrecarregar os portais.
+    const selecionados = [...candidatos.values()].slice(
+      0,
+      MAX_CURSOS_POR_FONTE
+    );
+
+    const resultados = await Promise.all(
+      selecionados.map(async candidato => {
+        const detalhe = await consultarDetalheCurso(
+          candidato.url,
+          candidato.titulo
+        );
+
+        if (!detalhe) return null;
+
+        return {
+          id: `${normalizar(fonte.instituicao)}-${candidato.url}`
+            .replace(/[^a-z0-9-]+/g, "-")
+            .slice(0, 180),
+
+          titulo: detalhe.titulo,
+          instituicao: fonte.instituicao,
+          categoria: detalhe.tipo === "aprendizagem" ? "aprendizagem" : detalhe.tipo,
+          tipo: detalhe.tipo,
+          status: "consultar_portal",
+
+          // Não substitui a descrição específica por texto institucional.
+          descricao: detalhe.descricao,
+          detalhes: detalhe.detalhes,
+          requisitos: detalhe.requisitos,
+          cargaHoraria: detalhe.cargaHoraria,
+          modalidade: detalhe.modalidade,
+
+          dataPublicacao: null,
+          dataEncerramento: null,
+
+          // A presença da palavra "gratuito" não comprova
+          // que aquela turma específica seja gratuita.
+          gratuito: null,
+
+          url: candidato.url,
+          fonte: fonte.url,
+          dadosConfirmados: false
+        };
+      })
+    );
+
+    const oportunidades = resultados.filter(Boolean);
+
+    // Mantém o portal para que o usuário sempre possa consultar a fonte.
+    oportunidades.push(portal);
+
+    return {
+      oportunidades,
+      fonte: {
+        instituicao: fonte.instituicao,
+        url: fonte.url,
+        status: "consultada",
+        totalEncontrado: oportunidades.filter(
+          item => item.tipo !== "portal"
+        ).length
+      }
+    };
+  } catch (erro) {
+    return {
+      oportunidades: [portal],
+      fonte: {
+        instituicao: fonte.instituicao,
+        url: fonte.url,
+        status: "indisponivel",
+        erro:
+          erro.name === "TimeoutError"
+            ? "Tempo limite excedido"
+            : erro.message,
+        totalEncontrado: 0
+      }
+    };
+  }
+}
+
+async function atualizarCache(forcar = false) {
+  if (
+    !forcar &&
+    cache.atualizadoEm &&
+    Date.now() - ultimaConsulta < TEMPO_CACHE_MS
+  ) {
+    return cache;
+  }
+
+  if (consultaEmAndamento) {
+    return consultaEmAndamento;
+  }
+
+  consultaEmAndamento = (async () => {
+    const resultados = await Promise.all(
+      fontes.map(consultarFonte)
+    );
+
+    const todas = resultados.flatMap(
+      resultado => resultado.oportunidades
+    );
+
+    const unicas = [
+      ...new Map(
+        todas.map(item => [item.url, item])
+      ).values()
+    ];
+
+    const todasIndisponiveis = resultados.every(
+      resultado => resultado.fonte.status === "indisponivel"
+    );
+
+    if (
+      todasIndisponiveis &&
+      cache.oportunidades.length > 0
+    ) {
+      cache.fontes = resultados.map(
+        resultado => resultado.fonte
+      );
+
+      ultimaConsulta = Date.now();
+
+      return cache;
+    }
+
+    cache = {
+      atualizadoEm: new Date().toISOString(),
+      oportunidades: unicas,
+      fontes: resultados.map(
+        resultado => resultado.fonte
+      )
+    };
+
+    ultimaConsulta = Date.now();
+
+    return cache;
+  })();
+
+  try {
+    return await consultaEmAndamento;
+  } finally {
+    consultaEmAndamento = null;
+  }
+}
+
+app.get("/api/health", (_req, res) => {
+  res.json({
+    ok: true,
+    mensagem: "API Futuro em Construção funcionando",
+    fontesConfiguradas: fontes.length,
+    cacheAtualizadoEm: cache.atualizadoEm
+  });
+});
+
+app.get("/api/oportunidades", async (req, res) => {
+  try {
+    const dados = await atualizarCache(
+      req.query.atualizar === "1"
+    );
+
+    const termo = normalizar(req.query.q || "");
+    const categoria = normalizar(
+      req.query.categoria || "todos"
+    );
+    const instituicao = normalizar(
+      req.query.instituicao || "todas"
+    );
+
+    const oportunidades = dados.oportunidades.filter(item => {
+      const texto = normalizar([
+        item.titulo,
+        item.instituicao,
+        item.categoria,
+        item.tipo,
+        item.descricao,
+        item.detalhes,
+        item.requisitos,
+        item.modalidade
+      ].filter(Boolean).join(" "));
+
+      return (
+        (!termo || texto.includes(termo)) &&
+        (
+          categoria === "todos" ||
+          normalizar(item.categoria) === categoria
+        ) &&
+        (
+          instituicao === "todas" ||
+          normalizar(item.instituicao) === instituicao
+        )
+      );
+    });
+
+    res.json({
+      atualizadoEm: dados.atualizadoEm,
+      total: oportunidades.length,
+      oportunidades,
+      fontes: dados.fontes,
+      aviso:
+        "As informações extraídas automaticamente podem estar incompletas. Confirme inscrições, requisitos, valores e prazos no portal oficial. Um link encontrado não comprova que existam vagas abertas."
+    });
+  } catch (erro) {
+    res.status(500).json({
+      erro: "Não foi possível consultar as oportunidades.",
+      detalhe:
+        process.env.NODE_ENV === "development"
+          ? erro.message
+          : undefined
+    });
+  }
+});
+
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(
+      `API Futuro em Construção disponível em http://localhost:${PORT}`
+    );
+  });
+}
+
+module.exports = app;

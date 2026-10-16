@@ -1,0 +1,638 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101d35" />
+
+    <meta
+      name="description"
+      content="Encontre vestibulares, cursos técnicos, bolsas de estudo e cursos gratuitos para construir seu futuro."
+    />
+
+    <title>Futuro em Construção — Seu próximo passo começa aqui</title>
+
+    <link rel="stylesheet" href="../style/index.css" />
+  
+    <script src="../js/interacoes.js" defer></script>
+   
+  </head>
+  <body>
+    <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
+
+    <header class="cabecalho">
+      <div class="container navegacao">
+        <a
+          href="#inicio"
+          class="marca"
+          aria-label="Futuro em Construção — Início"
+        >
+          <span class="marca-icone" aria-hidden="true">
+            <svg viewBox="0 0 40 40" fill="none">
+              <path
+                d="M7 30V10H15L25 23V10H33V30H25L15 17V30H7Z"
+                fill="currentColor"
+              />
+              <circle cx="32" cy="8" r="4" fill="#C8F169" />
+            </svg>
+          </span>
+
+          <span class="marca-texto">
+            Futuro em
+            <strong>Construção.</strong>
+          </span>
+        </a>
+
+        <button
+          class="menu-botao"
+          id="menuBotao"
+          type="button"
+          aria-label="Abrir menu"
+          aria-expanded="false"
+          aria-controls="menuNavegacao"
+        >
+          <span></span>
+          <span></span>
+        </button>
+
+        <nav class="menu" id="menuNavegacao" aria-label="Navegação principal">
+          <a href="#oportunidades">Oportunidades</a>
+          <a href="#cursos">Cursos gratuitos</a>
+          <a href="#sobre">Sobre o projeto</a>
+          <a href="#oportunidades" class="menu-destaque">
+            Encontrar meu caminho <span aria-hidden="true">↗</span>
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="conteudo">
+      <!-- HERO -->
+      <section class="hero" id="inicio">
+        <div class="hero-grade" aria-hidden="true"></div>
+
+        <div class="container hero-layout">
+          <div class="hero-texto">
+            <div class="etiqueta-hero">
+              <span class="ponto-verde"></span>
+              INFORMAÇÃO PARA IR MAIS LONGE
+            </div>
+
+            <h1>
+              Seu futuro não vem pronto.
+              <span>Você constrói.</span>
+            </h1>
+
+            <p class="hero-descricao">
+              Vestibulares, cursos técnicos e oportunidades gratuitas reunidos
+              em um só lugar. Descubra suas opções e escolha o próximo passo.
+            </p>
+
+            <div class="hero-acoes">
+              <a href="#oportunidades" class="botao botao-verde">
+                Explorar oportunidades <span aria-hidden="true">↗</span>
+              </a>
+
+              <a href="#sobre" class="link-hero">
+                Conheça o projeto <span aria-hidden="true">↓</span>
+              </a>
+            </div>
+
+            <div class="hero-nota">
+              <span class="nota-linha"></span>
+              Informação para tomar decisões melhores.
+            </div>
+          </div>
+
+          <div
+            class="hero-visual"
+            aria-label="Ilustração gráfica sobre caminhos e educação"
+          >
+            <div class="visual-circulo circulo-externo"></div>
+            <div class="visual-circulo circulo-meio"></div>
+            <div class="visual-circulo circulo-interno"></div>
+
+            <div class="visual-cruz cruz-um">+</div>
+            <div class="visual-cruz cruz-dois">+</div>
+            <div class="visual-ponto ponto-um"></div>
+            <div class="visual-ponto ponto-dois"></div>
+
+            <div class="visual-trajeto">
+              <svg viewBox="0 0 320 340" fill="none" aria-hidden="true">
+                <path
+                  d="M35 302C35 242 105 252 105 190C105 137 182 157 182 98C182 55 219 40 272 40"
+                  stroke="#C8F169"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                  stroke-dasharray="7 9"
+                />
+                <circle cx="35" cy="302" r="8" fill="#C8F169" />
+                <circle cx="272" cy="40" r="12" fill="#C8F169" />
+                <circle cx="272" cy="40" r="4" fill="#101D35" />
+              </svg>
+            </div>
+
+            <div class="visual-etiqueta etiqueta-inicio">
+              <span>01</span> COMEÇAR
+            </div>
+
+            <div class="visual-etiqueta etiqueta-fim">
+              <span>02</span> IR ALÉM
+            </div>
+
+            <div class="visual-frase">
+              <span class="aspas">“</span>
+              <p>O próximo passo pode mudar tudo.</p>
+              <span class="frase-linha"></span>
+            </div>
+
+            <div class="visual-selo">SEU<br />CAMINHO<br /><span>↗</span></div>
+          </div>
+        </div>
+
+        <div class="hero-rodape">
+          <div class="container hero-rodape-conteudo">
+            <span>01 / INFORMAR</span>
+            <span>02 / EXPLORAR</span>
+            <span>03 / ESCOLHER</span>
+            <span class="hero-rodape-direita">O PRIMEIRO PASSO É SEU.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- OPORTUNIDADES -->
+      <section class="secao-oportunidades" id="oportunidades">
+        <div class="container">
+          <div class="cabecalho-secao">
+            <div>
+              <span class="sobretitulo">POSSIBILIDADES REAIS</span>
+              <h2>Por onde você<br /><span>quer começar?</span></h2>
+            </div>
+
+            <p class="texto-secao">
+              Cada caminho é diferente. Pesquise, compare as opções e encontre
+              aquela que combina com seus planos.
+            </p>
+          </div>
+
+          <!-- Pesquisa dos cards originais -->
+          <div class="pesquisa-area">
+            <div class="pesquisa-campo">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle
+                  cx="10.8"
+                  cy="10.8"
+                  r="6.8"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                />
+                <path
+                  d="M16 16L21 21"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                />
+              </svg>
+
+              <label class="sr-only" for="campoPesquisa">
+                Pesquisar oportunidades
+              </label>
+
+              <input
+                type="search"
+                id="campoPesquisa"
+                placeholder="Ex.: ETEC, faculdade, curso de tecnologia..."
+                autocomplete="off"
+              />
+            </div>
+
+            <button type="button" id="limparPesquisa" class="limpar-botao">
+              Limpar pesquisa <span aria-hidden="true">×</span>
+            </button>
+          </div>
+
+          <div class="filtros-area">
+            <span class="filtros-legenda">FILTRAR POR</span>
+
+            <div class="filtros" aria-label="Categorias de oportunidades">
+              <button
+                class="filtro ativo"
+                type="button"
+                data-filtro="todos"
+                aria-pressed="true"
+              >
+                Todas
+              </button>
+
+              <button
+                class="filtro"
+                type="button"
+                data-filtro="vestibular"
+                aria-pressed="false"
+              >
+                Vestibulares
+              </button>
+
+              <button
+                class="filtro"
+                type="button"
+                data-filtro="tecnico"
+                aria-pressed="false"
+              >
+                Cursos técnicos
+              </button>
+
+              <button
+                class="filtro"
+                type="button"
+                data-filtro="gratuito"
+                aria-pressed="false"
+              >
+                Gratuitos
+              </button>
+
+              <button
+                class="filtro"
+                type="button"
+                data-filtro="bolsa"
+                aria-pressed="false"
+              >
+                Bolsas de estudo
+              </button>
+            </div>
+
+            <span
+              class="contador-resultados"
+              id="contadorResultados"
+              aria-live="polite"
+              >06 oportunidades</span
+            >
+          </div>
+
+          <!-- Cards originais: mantidos -->
+          <div class="grade-oportunidades" id="listaOportunidades">
+            <article
+              class="oportunidade-card card-escuro"
+              data-categorias="vestibular gratuito"
+              data-pesquisa="enem exame nacional ensino medio inep universidade faculdade sisu"
+            >
+              <div class="card-topo">
+                <span class="card-numero">01 / PROVA</span>
+                <span class="card-icone" aria-hidden="true">↗</span>
+              </div>
+
+              <div class="card-corpo">
+                <span class="card-categoria">ENSINO SUPERIOR</span>
+                <h3>ENEM</h3>
+                <p>
+                  Uma das principais portas de entrada para universidades e
+                  programas de acesso ao ensino superior.
+                </p>
+              </div>
+
+              <a
+                class="card-link"
+                href="https://www.gov.br/inep/pt-br/areas-de-atuacao/avaliacao-e-exames-educacionais/enem"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Acessar informações oficiais <span aria-hidden="true">↗</span>
+              </a>
+            </article>
+
+            <article
+              class="oportunidade-card card-verde"
+              data-categorias="tecnico gratuito"
+              data-pesquisa="etec vestibulinho centro paula souza ensino medio cursos tecnicos"
+            >
+              <div class="card-topo">
+                <span class="card-numero">02 / FORMAÇÃO</span>
+                <span class="card-icone" aria-hidden="true">↗</span>
+              </div>
+
+              <div class="card-corpo">
+                <span class="card-categoria">ENSINO TÉCNICO</span>
+                <h3>ETEC</h3>
+                <p>
+                  Conheça opções de ensino médio e cursos técnicos nas Escolas
+                  Técnicas Estaduais de São Paulo.
+                </p>
+              </div>
+
+              <a
+                class="card-link"
+                href="https://vestibulinho.etec.sp.gov.br/lp/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Consultar vestibulinho <span aria-hidden="true">↗</span>
+              </a>
+            </article>
+
+            <article
+              class="oportunidade-card card-claro"
+              data-categorias="vestibular gratuito"
+              data-pesquisa="fatec vestibular faculdade tecnologia graduacao centro paula souza"
+            >
+              <div class="card-topo">
+                <span class="card-numero">03 / GRADUAÇÃO</span>
+                <span class="card-icone" aria-hidden="true">↗</span>
+              </div>
+
+              <div class="card-corpo">
+                <span class="card-categoria">ENSINO SUPERIOR</span>
+                <h3>FATEC</h3>
+                <p>
+                  Explore cursos superiores de tecnologia e conheça os processos
+                  seletivos das faculdades estaduais.
+                </p>
+              </div>
+
+              <a
+                class="card-link"
+                href="https://vestibular.fatec.sp.gov.br/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Consultar vestibular <span aria-hidden="true">↗</span>
+              </a>
+            </article>
+
+            <article
+              class="oportunidade-card card-claro"
+              data-categorias="tecnico gratuito"
+              data-pesquisa="senai formacao profissional aprendizagem industrial curso tecnico emprego"
+            >
+              <div class="card-topo">
+                <span class="card-numero">04 / PROFISSÃO</span>
+                <span class="card-icone" aria-hidden="true">↗</span>
+              </div>
+
+              <div class="card-corpo">
+                <span class="card-categoria">FORMAÇÃO PROFISSIONAL</span>
+                <h3>SENAI</h3>
+                <p>
+                  Pesquise oportunidades de formação e qualificação em áreas
+                  ligadas à indústria e à tecnologia.
+                </p>
+              </div>
+
+              <a
+                class="card-link"
+                href="https://www.sp.senai.br/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Explorar cursos <span aria-hidden="true">↗</span>
+              </a>
+            </article>
+
+            <article
+              class="oportunidade-card card-claro"
+              data-categorias="gratuito"
+              data-pesquisa="escola virtual fundacao bradesco curso online gratuito tecnologia administracao"
+            >
+              <div class="card-topo">
+                <span class="card-numero">05 / APRENDIZADO</span>
+                <span class="card-icone" aria-hidden="true">↗</span>
+              </div>
+
+              <div class="card-corpo">
+                <span class="card-categoria">CURSOS ON-LINE</span>
+                <h3>Escola Virtual</h3>
+                <p>
+                  Aprenda no seu ritmo com cursos gratuitos em diferentes áreas
+                  do conhecimento.
+                </p>
+              </div>
+
+              <a
+                class="card-link"
+                href="https://www.ev.org.br/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Ver cursos disponíveis <span aria-hidden="true">↗</span>
+              </a>
+            </article>
+
+            <article
+              class="oportunidade-card card-claro"
+              data-categorias="vestibular gratuito bolsa"
+              data-pesquisa="prouni programa universidade para todos bolsa estudo mec faculdade"
+            >
+              <div class="card-topo">
+                <span class="card-numero">06 / ACESSO</span>
+                <span class="card-icone" aria-hidden="true">↗</span>
+              </div>
+
+              <div class="card-corpo">
+                <span class="card-categoria">BOLSAS DE ESTUDO</span>
+                <h3>ProUni</h3>
+                <p>
+                  Consulte o programa de bolsas em instituições privadas de
+                  ensino superior e seus requisitos.
+                </p>
+              </div>
+
+              <a
+                class="card-link"
+                href="https://acessounico.mec.gov.br/prouni"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Conhecer o programa <span aria-hidden="true">↗</span>
+              </a>
+            </article>
+          </div>
+
+          <div class="sem-resultados" id="mensagemVazia" hidden>
+            <span class="sem-resultados-icone" aria-hidden="true">?</span>
+            <h3>Não encontramos essa oportunidade.</h3>
+            <p>Tente outro termo ou selecione uma categoria diferente.</p>
+            <button type="button" id="limparTudo">Limpar filtros</button>
+          </div>
+
+          <!-- Resultados dinâmicos da API -->
+          <div class="editais-dinamicos">
+            <div class="editais-dinamicos-cabecalho">
+              <div>
+                <span class="sobretitulo">BUSCA AUTOMÁTICA</span>
+                <h3>Mais oportunidades para você</h3>
+                <p>Consulte opções encontradas nos portais de instituições.</p>
+              </div>
+
+              <button
+                type="button"
+                id="atualizarEditais"
+                class="botao-atualizar"
+              >
+                Atualizar ↻
+              </button>
+            </div>
+
+            <p id="statusEditais" role="status" aria-live="polite">
+              Carregando oportunidades...
+            </p>
+
+            <p id="atualizacaoEditais" class="editais-atualizacao"></p>
+
+            <div id="resultadosEditais" class="grade-oportunidades"></div>
+
+            <p id="mensagemVaziaEditais" hidden>
+              Nenhuma oportunidade encontrada na consulta atual.
+            </p>
+
+            <details class="editais-fontes">
+              <summary>Consultar fontes e situação da busca</summary>
+              <ul id="fontesEditais"></ul>
+            </details>
+
+            <p id="avisoEditais" class="aviso-oficial">
+              Confirme prazos, requisitos e condições no portal oficial. A busca
+              automática pode não encontrar todos os editais.
+            </p>
+          </div>
+
+          <p class="aviso-oficial">
+            <span aria-hidden="true">i</span>
+            <span>
+              Os prazos, requisitos, cursos e condições podem mudar. Confira o
+              edital e as informações atualizadas nos canais oficiais.
+            </span>
+          </p>
+        </div>
+      </section>
+
+      <!-- CURSOS GRATUITOS -->
+      <section class="secao-cursos" id="cursos">
+        <div class="container cursos-layout">
+          <div class="cursos-intro">
+            <span class="sobretitulo sobretitulo-claro"
+              >APRENDER NÃO PRECISA ESPERAR</span
+            >
+            <h2>Um conhecimento novo pode abrir <span>outras portas.</span></h2>
+            <p>
+              Você também pode começar agora, explorar uma área diferente e
+              desenvolver habilidades sem precisar sair de casa.
+            </p>
+          </div>
+
+          <div class="cursos-lista">
+            <a
+              class="curso-item"
+              href="https://www.ev.org.br/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span class="curso-numero">01</span>
+              <span class="curso-info">
+                <strong>Fundação Bradesco</strong>
+                <small>Cursos on-line gratuitos</small>
+              </span>
+              <span class="curso-seta" aria-hidden="true">↗</span>
+            </a>
+
+            <a
+              class="curso-item"
+              href="https://www.sp.senai.br/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span class="curso-numero">02</span>
+              <span class="curso-info">
+                <strong>SENAI São Paulo</strong>
+                <small>Formação profissional</small>
+              </span>
+              <span class="curso-seta" aria-hidden="true">↗</span>
+            </a>
+
+            <div class="cursos-observacao">
+              <span class="observacao-sinal">↳</span>
+              <p>
+                Consulte os sites para conferir gratuidade, disponibilidade e
+                critérios de inscrição de cada curso.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="cursos-fundo-numero" aria-hidden="true">+</div>
+      </section>
+
+      <!-- SOBRE -->
+      <section class="secao-sobre" id="sobre">
+        <div class="container sobre-layout">
+          <div class="sobre-titulo">
+            <span class="sobretitulo">DE ONDE VEIO A IDEIA</span>
+            <h2>Informação também é uma oportunidade.</h2>
+            <span class="sobre-risco" aria-hidden="true"></span>
+          </div>
+
+          <div class="sobre-texto">
+            <p>
+              O Futuro em Construção nasceu para facilitar a busca por
+              oportunidades de estudo. A proposta é reunir, em um só lugar,
+              referências sobre vestibulares, cursos técnicos, bolsas e formação
+              gratuita.
+            </p>
+
+            <p>
+              O site não substitui as instituições responsáveis. Ele ajuda você
+              a encontrar os caminhos e seguir para as fontes oficiais com mais
+              facilidade.
+            </p>
+
+            <a href="#oportunidades" class="sobre-link">
+              Escolher por onde começar <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- CHAMADA FINAL -->
+      <section class="chamada-final">
+        <div class="container chamada-conteudo">
+          <div>
+            <span class="sobretitulo">AGORA É COM VOCÊ</span>
+            <h2>Seu próximo passo começa com uma escolha.</h2>
+          </div>
+
+          <a href="#oportunidades" class="botao botao-escuro">
+            Encontrar oportunidades <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <!-- RODAPÉ -->
+    <footer class="rodape">
+      <div class="container rodape-principal">
+        <a href="#inicio" class="marca marca-rodape">
+          <span class="marca-icone" aria-hidden="true">
+            <svg viewBox="0 0 40 40" fill="none">
+              <path
+                d="M7 30V10H15L25 23V10H33V30H25L15 17V30H7Z"
+                fill="currentColor"
+              />
+              <circle cx="32" cy="8" r="4" fill="#C8F169" />
+            </svg>
+          </span>
+          <span class="marca-texto">
+            Futuro em
+            <strong>Construção.</strong>
+          </span>
+        </a>
+
+        <p>Informação para quem está construindo o próprio caminho.</p>
+
+        <a href="#inicio" class="voltar-topo"> Voltar ao topo ↑ </a>
+      </div>
+
+      <div class="container rodape-base">
+        <span>© <span id="anoAtual">2026</span> Futuro em Construção</span>
+        <span>Um projeto voltado à educação.</span>
+      </div>
+    </footer>
+  </body>
+</html>
